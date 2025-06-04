@@ -1,0 +1,46 @@
+services:
+  backend-dev:
+    build:
+      context: back
+      target: dev
+    volumes:
+      - pb-storage-dev:/pb_data
+    ports:
+      - 8081:8080
+    develop:
+      watch:
+        - action: rebuild
+          path: ./back
+          ignore:
+            - ./back/migrations/
+  frontend-dev:
+    build:
+      context: front
+      target: dev
+    ports:
+      - 5173:5173
+    develop:
+      watch:
+        - action: sync
+          path: ./front/src
+          target: /usr/src/app/src/web
+          ignore:
+            - node_modules/
+        - action: rebuild
+          path: package.json
+  
+  webapp:
+    build: .
+    ports:
+      - "8080:8080"
+    volumes:
+      - pb-storage:/pb_data
+    network_mode: bridge
+    restart: unless-stopped
+    profiles:
+      - prod
+
+volumes:
+  nginx-cache-storage:
+  pb-storage-dev:
+  pb-storage:
